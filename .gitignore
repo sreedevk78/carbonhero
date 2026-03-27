@@ -1,0 +1,31 @@
+# Environment variables
+.env
+
+# Flask instance folder
+instance/
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Database files
+*.db
+!instance/  # Keep the directory structure but ignore the actual DB content if desired
+instance/*.db
+
+# Temporary files
+tmp/
+*.log
+*.tmp
+
+# Editor settings
+.vscode/
+.idea/
+.DS_Store

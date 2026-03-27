@@ -1,0 +1,49 @@
+<!-- templates/login.html -->
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<section class="auth-page-bg">
+    <div class="container d-flex justify-content-center">
+        <div class="ch-card p-5" style="width: 100%; max-width: 450px; border-top: 5px solid var(--primary);">
+            <div class="text-center mb-5">
+                <div class="ch-brand__icon d-inline-block mb-3 fs-2 shadow-sm" style="padding: 0.5rem 1.25rem;">LOGIN</div>
+                <h2 class="h3 fw-bold text-uppercase tracking-wide">Welcome back</h2>
+                <p class="text-muted-custom small">Enter your credentials to access your dashboard.</p>
+            </div>
+
+            <form method="POST" class="needs-validation" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-4">
+                    <label class="form-label text-uppercase small tracking-wide fw-bold">{{ form.email.label.text }}</label>
+                    {{ form.email(class="form-control", placeholder="player@example.com") }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger small mt-2 fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label text-uppercase small tracking-wide fw-bold">{{ form.password.label.text }}</label>
+                    {{ form.password(class="form-control", placeholder="••••••••") }}
+                    {% for error in form.password.errors %}
+                        <div class="text-danger small mt-2 fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid mb-4">
+                    {{ form.submit(class="btn btn-ch-primary py-3 fs-6 rounded-1") }}
+                </div>
+                
+                <div class="text-center p-3 rounded-2" style="background-color: var(--surface-light);">
+                    <p class="text-muted-custom small mb-0 fw-bold">New player? <a href="{{ url_for('auth.signup') }}" class="text-primary-custom text-decoration-none ms-1 text-uppercase border-bottom border-primary border-2">Sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.tracking-wide { letter-spacing: 0.1em; }
+</style>
+{% endblock %}

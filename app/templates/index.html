@@ -1,0 +1,111 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block title %}Welcome to CarbonHero{% endblock %}
+
+{% block content %}
+<section class="hero-wrapper pb-5">
+    <div class="container position-relative">
+        <div class="row align-items-center flex-sm-row-reverse g-5">
+            <!-- Content -->
+            <div class="col-lg-6 ps-lg-5 text-center text-lg-start">
+                <h1 class="display-3 fw-bold mb-4" style="color: var(--primary); text-transform: uppercase;">Carbon Footprint gamified</h1>
+                <p class="text-muted-custom mb-4 fs-5" style="max-width: 500px; margin: 0 auto;">
+                    Track your daily habits, log your sustainable activities, and compete globally. Reduce your carbon footprint through a gamified experience designed to build lasting sustainable habits.
+                </p>
+                
+                <h5 class="fw-bold mt-5 mb-3">Quick Navigation:</h5>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-4">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-ch-primary"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a>
+                    <a href="{{ url_for('logger.log_entry') }}" class="btn btn-ch-outline"><i class="bi bi-plus-circle me-2"></i>Log Activity</a>
+                    <a href="{{ url_for('arena.leaderboard') }}" class="btn btn-ch-outline"><i class="bi bi-trophy me-2"></i>Leaderboard</a>
+                    <a href="{{ url_for('arena.environmental_news') }}" class="btn btn-ch-outline"><i class="bi bi-newspaper me-2"></i>News</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-ch-outline border-secondary text-white"><i class="bi bi-person-plus me-2"></i>Sign Up</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-ch-outline border-secondary text-white"><i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                </div>
+            </div>
+            
+            <!-- Illustration representing gamification vibe from user image -->
+            <div class="col-lg-6 text-center position-relative d-none d-lg-block" style="min-height: 400px;">
+                <!-- Gamification Vectors -->
+                <!-- Base white frame like in the image -->
+                <div class="position-absolute bg-white rounded-3 shadow-main" style="width: 250px; height: 180px; top: 50px; left: 100px; z-index: 1;">
+                    <div style="background-color: var(--secondary); height: 24px; border-top-left-radius: 8px; border-top-right-radius: 8px;"></div>
+                    <!-- Trophy icon representation -->
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <i class="bi bi-trophy-fill text-primary" style="font-size: 6rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"></i>
+                    </div>
+                </div>
+
+                <!-- Floating Heart bubble -->
+                <div class="position-absolute bg-white rounded-circle d-flex align-items-center justify-content-center shadow-main" style="width: 80px; height: 80px; bottom: 120px; right: 80px; z-index: 3;">
+                    <i class="bi bi-heart-fill text-danger fs-1"></i>
+                    <!-- Speech bubble tick -->
+                    <div class="position-absolute bg-white" style="width: 20px; height: 20px; bottom: -8px; left: 30px; transform: rotate(45deg);"></div>
+                </div>
+
+                <!-- Floating Flag bubble -->
+                <div class="position-absolute bg-white rounded-circle d-flex align-items-center justify-content-center shadow-main" style="width: 70px; height: 70px; top: 10px; right: 120px; z-index: 3;">
+                    <i class="bi bi-flag-fill text-danger fs-2"></i>
+                </div>
+
+                <!-- User profile badge -->
+                <div class="position-absolute text-center z-3" style="top: 30px; left: 30px;">
+                    <i class="bi bi-crown-fill text-primary fs-3 d-block text-shadow mb-1"></i>
+                    <div class="bg-danger rounded-circle d-flex justify-content-center align-items-center shadow-main border border-3 border-dark" style="width: 70px; height: 70px;">
+                        <i class="bi bi-person-fill text-white fs-1"></i>
+                    </div>
+                    <div class="bg-primary mt-2 rounded-pill" style="height: 10px; width: 60px; margin: 0 auto;"></div>
+                </div>
+
+                <!-- Gift Box (bottom center) -->
+                <div class="position-absolute z-3 text-center" style="bottom: -20px; right: 150px;">
+                    <div class="text-danger" style="margin-bottom: -5px;"><i class="bi bi-suit-heart-fill fs-3"></i></div>
+                    <div class="bg-primary d-flex align-items-center justify-content-center position-relative border border-2 border-dark" style="width: 100px; height: 100px; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);">
+                        <div class="position-absolute h-100 bg-danger" style="width: 20px;"></div>
+                        <div class="position-absolute w-100 bg-danger" style="height: 20px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Four Point Stars -->
+                <i class="bi bi-star-fill text-primary position-absolute fs-3" style="top: 80px; right: 40px; transform: rotate(45deg);"></i>
+                <i class="bi bi-star-fill text-primary position-absolute fs-4" style="bottom: 40px; left: 60px; transform: rotate(45deg);"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 mt-4">
+    <div class="container">
+        <h3 class="mb-5 text-center text-uppercase fs-2 tracking-wide text-primary">How it works</h3>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="ch-card text-center h-100 border-0 bg-surface">
+                    <div class="bg-primary bg-opacity-10 text-primary-custom rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 70px; height: 70px; font-size: 2rem;">
+                        <i class="bi bi-mic-fill"></i>
+                    </div>
+                    <h4 class="mb-3">Log Activity</h4>
+                    <p class="text-muted-custom mb-0">Use our standard forms, AI voice commands, or custom textual descriptions to instantly log transport, energy, and diet habits.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ch-card text-center h-100 border-0 bg-surface">
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 70px; height: 70px; font-size: 2rem;">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <h4 class="mb-3">Calculate Impact</h4>
+                    <p class="text-muted-custom mb-0">Our AI accurately models and calculates your carbon footprint savings down to the gram based on established scientific factors.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ch-card text-center h-100 border-0 bg-surface">
+                    <div class="bg-secondary bg-opacity-10 text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4 border border-secondary" style="width: 70px; height: 70px; font-size: 2rem;">
+                        <i class="bi bi-controller"></i>
+                    </div>
+                    <h4 class="mb-3">Rank Up</h4>
+                    <p class="text-muted-custom mb-0">Maintain login streaks, unlock environmental achievements, and climb the global leaderboards with your points.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

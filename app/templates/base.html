@@ -1,0 +1,225 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarbonHero - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+    <!-- Navbar matching image style -->
+    <nav class="navbar navbar-expand-lg ch-navbar">
+        <div class="container">
+            <a class="navbar-brand ch-brand text-decoration-none d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" height="38" alt="CarbonHero Logo" class="me-2 rounded-2 shadow-sm border border-1 border-secondary">
+                <span class="ms-1 fw-bold fs-4" style="color: var(--primary); letter-spacing: 1px;">CarbonHero</span>
+            </a>
+            <button class="navbar-toggler border-0 shadow-none text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list fs-2"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto gap-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.home' %}active{% endif %}" href="{{ url_for('main.home') }}">Home</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link px-3 ch-nav-link text-uppercase tracking-wide" href="{{ url_for('main.dashboard') }}"><i class="bi bi-grid-1x2-fill me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center ms-lg-2 mt-2 mt-lg-0">
+                        <a class="btn btn-danger btn-sm px-4 py-2 fw-bold text-uppercase tracking-wide rounded-1 shadow border border-danger hover-lift" href="{{ url_for('arena.boss_arena') }}" style="background: linear-gradient(135deg, #8a0000, #e60000); box-shadow: 0 4px 15px rgba(220,53,69,0.5) !important;"><i class="bi bi-crosshair me-1"></i> BOSS ARENA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'logger.log_entry' %}active{% endif %}" href="{{ url_for('logger.log_entry') }}">Log Activity</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'arena.leaderboard' %}active{% endif %}" href="{{ url_for('arena.leaderboard') }}">Leaderboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'arena.achievements' %}active{% endif %}" href="{{ url_for('arena.achievements') }}">Badges</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'arena.environmental_news' %}active{% endif %}" href="{{ url_for('arena.environmental_news') }}">News</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Log In</a></li>
+                    {% endif %}
+                </ul>
+
+                {% if current_user.is_authenticated %}
+                <div class="d-flex align-items-center gap-4">
+                    <span class="text-primary-custom fw-bold fs-5"><i class="bi bi-star-fill"></i> {{ current_user.total_points }}</span>
+                    <span class="fw-bold fs-5" style="color: var(--danger);"><i class="bi bi-fire"></i> {{ current_user.streak }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-ch-outline ms-2 px-3 py-2" style="font-size: 0.8rem;">Logout</a>
+                </div>
+                {% else %}
+                <div class="d-flex align-items-center">
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-ch-primary">Get Started</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flashed Messages -->
+    <div class="toast-container position-fixed top-0 end-0 p-3 mt-5" style="z-index: 1060;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-custom alert-{{ category }}-custom fade show d-flex align-items-center gap-2 alert-dismissible" role="alert">
+                        {% if category == 'success' %}<i class="bi bi-check-circle-fill text-primary-custom fs-5"></i>{% endif %}
+                        {% if category == 'danger' or category == 'warning' %}<i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>{% endif %}
+                        <div class="mb-0">{{ message }}</div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Interactive AI Chat Widget -->
+    {% if current_user.is_authenticated %}
+    <!-- Floating AI Avatar Button -->
+    <div id="ai-chat-fab" onclick="toggleChatPanel()" style="position:fixed;bottom:24px;right:24px;z-index:1090;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#0dcaf0,#0d6efd);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(13,202,240,0.5);transition:transform 0.3s,box-shadow 0.3s;animation:fab-pulse 2s ease-in-out infinite;">
+        <i class="bi bi-robot fs-3 text-dark"></i>
+    </div>
+
+    <!-- Chat Panel -->
+    <div id="ai-chat-panel" style="display:none;position:fixed;bottom:95px;right:24px;z-index:1091;width:360px;max-height:480px;border-radius:12px;background:var(--surface-light,#1a1a2e);border:1px solid rgba(13,202,240,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.5);overflow:hidden;">
+        <div style="padding:12px 16px;background:linear-gradient(135deg,#0dcaf0,#0d6efd);display:flex;align-items:center;gap:10px;">
+            <i class="bi bi-robot fs-4 text-dark"></i>
+            <span class="fw-bold text-dark text-uppercase" style="letter-spacing:1px;font-size:0.85rem;">CarbonHero AI</span>
+            <button onclick="toggleChatPanel()" class="btn-close btn-close-dark ms-auto" style="font-size:0.6rem;"></button>
+        </div>
+        <div id="ai-chat-messages" style="padding:12px;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+            <div class="ai-msg" style="background:rgba(13,202,240,0.1);border:1px solid rgba(13,202,240,0.2);border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#e0e0e0;align-self:flex-start;max-width:85%;">
+                <i class="bi bi-patch-check-fill text-info me-1"></i> Hey Hero! I'm your eco-companion. Ask me anything about your carbon journey or the Smog Boss fight!
+            </div>
+        </div>
+        <div style="padding:8px 12px;border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:8px;">
+            <input id="ai-chat-input" type="text" placeholder="Type a message..." style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 12px;color:#fff;font-size:0.85rem;outline:none;" onkeydown="if(event.key==='Enter')sendChatMessage()">
+            <button onclick="sendChatMessage()" style="background:linear-gradient(135deg,#0dcaf0,#0d6efd);border:none;border-radius:6px;padding:6px 14px;color:#000;font-weight:bold;cursor:pointer;"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+
+    <!-- Random AI Popup Container -->
+    <div id="ai-random-popup" style="display:none;position:fixed;z-index:1085;max-width:300px;padding:14px 18px;border-radius:10px;background:var(--surface-light,#1a1a2e);border:1px solid rgba(13,202,240,0.3);box-shadow:0 4px 20px rgba(0,0,0,0.4);font-size:0.85rem;color:#e0e0e0;cursor:pointer;transition:opacity 0.4s,transform 0.4s;" onclick="this.style.display='none'">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <i class="bi bi-lightbulb-fill text-info"></i>
+            <span class="fw-bold text-info text-uppercase" style="font-size:0.7rem;letter-spacing:1px;">CarbonHero AI</span>
+            <span class="ms-auto text-muted-custom" style="font-size:0.65rem;">click to close</span>
+        </div>
+        <div id="ai-random-popup-text">Loading tip...</div>
+    </div>
+
+    <style>
+    @keyframes fab-pulse { 0%,100%{transform:scale(1);box-shadow:0 4px 20px rgba(13,202,240,0.5)} 50%{transform:scale(1.08);box-shadow:0 6px 30px rgba(13,202,240,0.8)} }
+    #ai-chat-fab:hover { transform:scale(1.15) !important; }
+    #ai-chat-messages::-webkit-scrollbar { width:4px; }
+    #ai-chat-messages::-webkit-scrollbar-thumb { background:rgba(13,202,240,0.3);border-radius:4px; }
+    </style>
+
+    <script>
+    function toggleChatPanel() {
+        const panel = document.getElementById('ai-chat-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function appendMessage(text, isUser) {
+        const container = document.getElementById('ai-chat-messages');
+        const div = document.createElement('div');
+        div.style.cssText = isUser
+            ? 'background:rgba(13,110,253,0.2);border:1px solid rgba(13,110,253,0.3);border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#e0e0e0;align-self:flex-end;max-width:85%;'
+            : 'background:rgba(13,202,240,0.1);border:1px solid rgba(13,202,240,0.2);border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#e0e0e0;align-self:flex-start;max-width:85%;';
+        div.innerHTML = isUser ? text : '<i class="bi bi-patch-check-fill text-info me-1"></i> ' + text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('ai-chat-input');
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        appendMessage(msg, true);
+        appendMessage('<span class="spinner-border spinner-border-sm text-info"></span> Thinking...', false);
+        fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})})
+            .then(r => r.json())
+            .then(data => {
+                const msgs = document.getElementById('ai-chat-messages');
+                msgs.removeChild(msgs.lastChild);
+                appendMessage(data.reply, false);
+            })
+            .catch(() => {
+                const msgs = document.getElementById('ai-chat-messages');
+                msgs.removeChild(msgs.lastChild);
+                appendMessage("Connection error. Try again!", false);
+            });
+    }
+
+    // Random popup system
+    const popupPositions = [
+        {bottom:'120px',left:'24px',right:'auto',top:'auto'},
+        {top:'100px',right:'24px',bottom:'auto',left:'auto'},
+        {top:'100px',left:'24px',bottom:'auto',right:'auto'},
+        {bottom:'120px',right:'24px',top:'auto',left:'auto'},
+        {top:'50%',left:'24px',bottom:'auto',right:'auto'},
+        {top:'50%',right:'24px',bottom:'auto',left:'auto'},
+    ];
+    function showRandomPopup() {
+        fetch('/api/insights')
+            .then(r => r.json())
+            .then(data => {
+                const popup = document.getElementById('ai-random-popup');
+                const pos = popupPositions[Math.floor(Math.random() * popupPositions.length)];
+                popup.style.top = pos.top; popup.style.bottom = pos.bottom;
+                popup.style.left = pos.left; popup.style.right = pos.right;
+                document.getElementById('ai-random-popup-text').innerText = data.tip;
+                popup.style.display = 'block';
+                popup.style.opacity = '0'; popup.style.transform = 'translateY(10px)';
+                setTimeout(() => { popup.style.opacity = '1'; popup.style.transform = 'translateY(0)'; }, 50);
+                setTimeout(() => { popup.style.opacity = '0'; setTimeout(() => popup.style.display = 'none', 400); }, 12000);
+            }).catch(() => {});
+    }
+
+    // Initial popup after 5s, then random every 35-65s
+    setTimeout(showRandomPopup, 5000);
+    setInterval(() => { setTimeout(showRandomPopup, Math.random() * 30000); }, 35000);
+    </script>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-5 border-top border-custom">
+        <div class="container">
+            <div class="row align-items-center text-center text-md-start">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" height="32" alt="CarbonHero Logo" class="mb-3 rounded-2 shadow-sm border border-1 border-secondary opacity-75">
+                    <p class="text-muted-custom small mb-0">Build your sustainable streak.<br>&copy; 2025 CarbonHero.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-muted-custom text-decoration-none mx-2 fs-5 hover-text-primary"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-muted-custom text-decoration-none mx-2 fs-5 hover-text-primary"><i class="bi bi-github"></i></a>
+                    <a href="#" class="text-muted-custom text-decoration-none mx-2 fs-5 hover-text-primary"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% if bootstrap is defined and false %}
+        {{ bootstrap.load_js() }}
+    {% endif %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

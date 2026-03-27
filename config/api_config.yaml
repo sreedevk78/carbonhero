@@ -1,0 +1,11 @@
+apis:
+   gemini:
+      key: "your-gemini-api-key"
+   climate_news:
+      key: "your-climate-news-api-key"
+      endpoint: "https://api.climatenews.org/v1"
+   air_quality:
+      key: "your-air-quality-api-key"
+      endpoint: "https://api.airquality.com/v1"
+   background_gen:
+      key: "your-background-gen-api-key"

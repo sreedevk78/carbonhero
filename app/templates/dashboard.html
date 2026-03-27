@@ -1,0 +1,195 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <!-- Header & Core KPI Hub -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-4">
+            <div>
+                <h1 class="display-4 fw-bold text-gamification mb-2" style="color: var(--primary); letter-spacing: 1px;">COMMAND CENTER</h1>
+                <p class="text-muted-custom fs-5 mb-0 fw-bold">Welcome back. Your eco-stats at a glance.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-3">
+                <div class="ch-card py-3 px-4 text-center border-0 border-start border-4 border-warning shadow-sm" style="border-radius: 8px; border-color: var(--primary) !important;">
+                    <div class="text-muted-custom text-uppercase small fw-bold tracking-wide mb-1">Total Points</div>
+                    <div class="fs-2 fw-bold" style="color: var(--primary); line-height: 1;">{{ points }}</div>
+                </div>
+                <div class="ch-card py-3 px-4 text-center border-0 border-start border-4 border-danger shadow-sm" style="border-radius: 8px; border-color: var(--danger) !important;">
+                    <div class="text-muted-custom text-uppercase small fw-bold tracking-wide mb-1">Day Streak</div>
+                    <div class="fs-2 fw-bold" style="color: var(--danger); line-height: 1;">{{ streak }} <i class="bi bi-fire fs-4"></i></div>
+                </div>
+                <!-- Mini Impact Summary -->
+                <div class="ch-card py-3 px-4 text-center border-0 border-start border-4 border-info shadow-sm" style="border-radius: 8px; border-color: #0dcaf0 !important;">
+                    <div class="text-muted-custom text-uppercase small fw-bold tracking-wide mb-1">CO₂ Saved</div>
+                    <div class="fs-2 fw-bold text-info" style="line-height: 1;">{{ "%.1f"|format(carbon_score) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Col: Hub Activity -->
+            <div class="col-lg-8">
+                
+                <!-- Boss Teaser Alert -->
+                <div class="ch-card mb-4 border-0 shadow-sm position-relative overflow-hidden hover-lift" style="background: linear-gradient(145deg, var(--bg-color), #2a0a0a); border-left: 6px solid var(--danger) !important;">
+                    <div class="position-absolute top-0 end-0 h-100 w-50" style="background: radial-gradient(circle at right, rgba(220,53,69,0.1) 0%, transparent 100%);"></div>
+                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between p-2 position-relative z-1 gap-3">
+                        <div class="d-flex align-items-center gap-4">
+                            <img src="{{ url_for('static', filename='images/smog_boss.png') }}" class="rounded-circle border border-2 border-danger shadow-sm" style="width: 80px; height: 80px; background-color: #000; animation: boss-pulse 3s ease-in-out infinite;" alt="Smog Boss">
+                            <div>
+                                <h4 class="fw-bold text-danger text-uppercase tracking-wide mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i> Combat Alert</h4>
+                                <p class="text-white mb-0 small fw-bold">The Smog Boss is actively gathering strength.</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('arena.boss_arena') }}" class="btn px-4 py-2 text-uppercase fw-bold tracking-wide rounded-1 w-100 w-md-auto text-white shadow-lg border border-2 border-danger hover-lift" style="background: linear-gradient(45deg, #8a0000, #ff0000);"><i class="bi bi-lightning-fill me-2 text-warning"></i> ENGAGE COMBAT</a>
+                    </div>
+                </div>
+
+
+
+                <!-- Recent Activity Table -->
+                <div class="ch-card border-0 shadow-sm border-top border-4 border-custom">
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-custom">
+                        <h3 class="fw-bold mb-0 text-uppercase tracking-wide fs-5">RECENT ACTIVITY LOG</h3>
+                        <a href="{{ url_for('logger.log_entry') }}" class="btn btn-ch-primary btn-sm rounded-1 px-4 py-2 text-dark fw-bold border border-dark border-2 border-bottom-0"><i class="bi bi-plus-lg me-1"></i> NEW LOG</a>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table-custom text-start align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Date</th>
+                                    <th>Activity Details</th>
+                                    <th>Impact</th>
+                                    <th class="text-end pe-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in carbon_logs %}
+                                <tr>
+                                    <td class="text-muted-custom text-uppercase text-nowrap fw-bold ps-3"><i class="bi bi-calendar3 me-2"></i>{{ log.date.strftime('%b %d') }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="feature-icon-wrapper p-2 rounded-1 border border-2 border-custom d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem; background-color: var(--bg-color);">
+                                                {% if log.transport_type == 'bike' %}<i class="bi bi-bicycle text-primary"></i>
+                                                {% elif log.transport_type == 'walk' %}<i class="bi bi-person-walking text-primary"></i>
+                                                {% elif log.transport_type == 'car' %}<i class="bi bi-car-front-fill text-danger"></i>
+                                                {% elif log.transport_type == 'bus' %}<i class="bi bi-bus-front-fill text-secondary"></i>
+                                                {% elif log.transport_type == 'train' %}<i class="bi bi-train-front-fill text-secondary"></i>
+                                                {% else %}<i class="bi bi-lightning-fill text-primary"></i>{% endif %}
+                                            </div>
+                                            <span class="fw-bold fs-6 text-uppercase tracking-wide text-main">
+                                                {% if log.activity_type == 'voice_input' or log.activity_type == 'custom' %}
+                                                    {{ log.description[:40] }}{% if log.description|length > 40 %}...{% endif %}
+                                                {% else %}
+                                                    {{ log.transport_type|title }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="badge badge-custom text-lowercase px-3 py-2 bg-bg-color border border-2 border-custom rounded-1">
+                                            <span class="fs-6 fw-bold {{ 'text-primary' if log.total_emissions < 2 else 'text-danger' }}">{{ "%.2f"|format(log.total_emissions) }} KG</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-3" style="width: 15%;">
+                                        <div class="ch-progress border border-2 border-custom rounded-1" style="height: 12px; border-radius: 4px;">
+                                            <div class="ch-progress-bar {{ 'bg-primary' if log.total_emissions < 2 else 'bg-danger' }}" role="progressbar" style="width: {{ (log.total_emissions/5)*100 }}%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% if not carbon_logs %}
+                        <div class="text-center py-5 rounded-2 mt-3" style="border: 2px dashed var(--border-color);">
+                            <i class="bi bi-journal-x text-muted-custom mb-3 d-inline-block" style="font-size: 3rem;"></i>
+                            <h5 class="text-main fw-bold text-uppercase tracking-wide">NO ACTIVITIES LOGGED</h5>
+                            <p class="text-muted-custom mb-4 fw-bold">Start logging activities to build your profile.</p>
+                            <a href="{{ url_for('logger.log_entry') }}" class="btn btn-ch-primary rounded-1">LOG FIRST ACTIVITY</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Col: Utilities & HUD -->
+            <div class="col-lg-4">
+                <!-- Quick Actions -->
+                <div class="ch-card mb-4 border-0 bg-primary p-4 position-relative overflow-hidden text-dark text-center shadow-lg rounded-2 border border-2 border-dark" style="border-radius: 12px;">
+                    <i class="bi bi-dpad-fill position-absolute" style="font-size: 10rem; right: -30px; top: -30px; opacity: 0.1;"></i>
+                    <h3 class="fw-bold text-uppercase position-relative z-1 mb-4 text-dark fs-5 tracking-wide border-bottom border-dark pb-3 border-opacity-25">QUICK ACTIONS</h3>
+                    <div class="d-grid gap-3 position-relative z-1 mt-4">
+                        <a href="{{ url_for('logger.log_entry') }}" class="btn bg-dark text-white fw-bold py-3 fs-6 d-flex justify-content-center align-items-center gap-2 border-0 rounded-1 hover-lift shadow-sm">
+                            <i class="bi bi-activity text-primary"></i> LOG ACTIVITY
+                        </a>
+                        <a href="{{ url_for('arena.leaderboard') }}" class="btn text-dark fw-bold py-3 fs-6 d-flex justify-content-center align-items-center gap-2 border border-2 border-dark bg-transparent rounded-1 hover-lift">
+                            <i class="bi bi-trophy-fill"></i> LEADERBOARD
+                        </a>
+                        <a href="{{ url_for('arena.environmental_news') }}" class="btn text-dark fw-bold py-3 fs-6 d-flex justify-content-center align-items-center gap-2 border border-2 border-dark bg-transparent rounded-1 hover-lift">
+                            <i class="bi bi-newspaper"></i> NEWS
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Achievements Grid -->
+                <div class="ch-card mb-4 border-0 shadow-sm border-top border-4 border-warning">
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-custom">
+                        <h3 class="fw-bold mb-0 text-uppercase tracking-wide fs-6">ACHIEVEMENTS</h3>
+                        <a href="{{ url_for('arena.achievements') }}" class="btn btn-sm btn-ch-outline px-2 py-1" style="font-size: 0.65rem;">VIEW ALL</a>
+                    </div>
+                    <div class="row g-4 mt-1">
+                        {% for achievement in achievements %}
+                        <div class="col-6">
+                            <div class="text-center h-100 hover-lift d-flex flex-column align-items-center justify-content-center">
+                                <div class="mb-2 position-relative z-1" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));">
+                                    <img src="{{ url_for('static', filename='images/' + achievement.image) }}" width="64" height="64" class="rounded-circle {% if achievement.id == 'top' %}hue-rotate-custom{% endif %}" alt="{{ achievement.title }}" style="object-fit: cover; background-color: transparent;">
+                                </div>
+                                <div class="fw-bold text-main text-uppercase tracking-wide lh-sm position-relative z-1 mt-1" style="font-size: 0.65rem;">{{ achievement.title }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Analytics Summary -->
+                <div class="ch-card border-0 shadow-sm border-top border-4 border-info opacity-75">
+                    <h3 class="fw-bold mb-4 pb-3 border-bottom border-custom text-uppercase tracking-wide fs-6">EMISSION ANALYTICS</h3>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-surface rounded-2 border border-2 border-custom">
+                            <div class="text-muted-custom text-uppercase small fw-bold tracking-wide">Total Emitted</div>
+                            <div class="fw-bold text-main fs-5">{{ "%.2f"|format(total_emissions) }} <span class="small text-muted-custom">kg</span></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-surface rounded-2 border border-2 border-custom">
+                            <div class="text-muted-custom text-uppercase small fw-bold tracking-wide">Daily Avg</div>
+                            <div class="fw-bold text-main fs-5">{{ "%.2f"|format(average_emissions) }} <span class="small text-muted-custom">kg</span></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded-2 border border-2 border-info bg-info text-dark">
+                            <div class="text-dark text-uppercase small fw-bold tracking-wide">AI Predicted Drop</div>
+                            <div class="fw-bold fs-5">-{{ "%.2f"|format(predicted_reduction) }} <span class="small opacity-75">kg</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<style>
+.hover-lift { transition: transform 0.2s, background-color 0.2s; }
+.hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important; }
+.tracking-wide { letter-spacing: 0.1em; }
+@keyframes boss-pulse {
+    0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px rgba(220,53,69,0.5)); border-color: rgba(220,53,69,0.5) !important; }
+    50% { transform: scale(1.03) translateY(-6px); filter: drop-shadow(0 0 25px rgba(220,53,69,1)); border-color: rgba(220,53,69,1) !important; }
+}
+.hue-rotate-custom { filter: hue-rotate(140deg) brightness(1.2); }
+</style>
+<script>
+// AI interactions are now handled globally by the chat widget in base.html
+</script>
+{% endblock %}

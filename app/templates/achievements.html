@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Achievements Directory{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <h2 class="fw-bold text-uppercase mb-0">🏆 Achievement Tracker</h2>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="ch-card shadow-sm position-relative overflow-hidden p-4">
+                <div class="row align-items-center position-relative z-1">
+                    <div class="col-md-8">
+                        <h4 class="fw-bold mb-2">RPG Hero Status</h4>
+                        <p class="text-muted-custom mb-0">Track your progress in defeating the Smog Boss.</p>
+                        <ul class="list-unstyled mt-3 mb-0">
+                            <li><strong>Level:</strong> {{ boss_level }}</li>
+                            <li><strong>Boss HP Remaining:</strong> {{ "%.0f"|format(boss_hp) }} / 1000</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="fw-bold text-uppercase mb-4">Badges & Titles</h3>
+    
+    <div class="row g-4">
+        {% for badge in badges %}
+        <div class="col-md-6 col-lg-4">
+            <div class="ch-card p-4 h-100 text-center {% if not badge.unlocked %}opacity-50{% endif %}" style="transition: all 0.3s ease;">
+                <div class="mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; {% if badge.unlocked %}filter: drop-shadow(0 4px 10px rgba(255,183,3,0.3));{% else %}filter: grayscale(100%) opacity(50%);{% endif %} {% if badge.id == 'top' and badge.unlocked %} filter: hue-rotate(140deg) brightness(1.2); {% endif %}">
+                    <img src="{{ url_for('static', filename='images/' + badge.image) }}" class="img-fluid" style="width: 100%; height: 100%; object-fit: contain; background-color: transparent;" alt="{{ badge.title }}">
+                </div>
+                <h5 class="fw-bold mb-2">{{ badge.title }}</h5>
+                <p class="text-muted-custom small mb-3">{{ badge.desc }}</p>
+                
+                {% if badge.unlocked %}
+                    <span class="badge-custom bg-success text-white d-inline-flex align-items-center">
+                        <i class="bi bi-unlock-fill me-1"></i> Unlocked
+                    </span>
+                {% else %}
+                    <span class="badge-custom bg-secondary text-white d-inline-flex align-items-center">
+                        <i class="bi bi-lock-fill me-1"></i> Locked
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

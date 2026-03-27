@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Boss Arena{% endblock %}
+
+{% block content %}
+<section class="py-5" style="min-height: 80vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-4">
+            <div>
+                <h1 class="display-4 fw-bold text-danger mb-2" style="letter-spacing: 2px; text-shadow: 0 0 20px rgba(220,53,69,0.3);">BOSS ARENA</h1>
+                <p class="text-muted-custom fs-5 mb-0 fw-bold">Engage the Smog Boss. Use your eco-actions as weapons.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-ch-outline py-2 px-4 rounded-1"><i class="bi bi-arrow-left"></i> Retreat to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Smog Boss Encounter -->
+                <div class="ch-card mb-4 border-0 shadow-lg position-relative overflow-hidden" style="background: linear-gradient(145deg, #111, #1a1a1c); border-top: 4px solid var(--danger) !important;">
+                    <div class="row align-items-center position-relative z-1 mb-4 p-md-3">
+                        <div class="col-md-5 text-center text-md-start mb-4 mb-md-0 position-relative">
+                            <img src="{{ url_for('static', filename='images/smog_boss.png') }}" class="img-fluid rounded-circle border border-5 border-danger" style="max-height: 240px; background-color: #000; animation: boss-pulse-heavy 3s ease-in-out infinite; box-shadow: 0 0 50px rgba(220,53,69,0.4);" alt="Smog Boss">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="fw-bold mb-0 text-uppercase tracking-wide display-6 text-danger" style="text-shadow: 0 0 10px rgba(220,53,69,0.5);">THE SMOG BOSS</h3>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-end mb-1">
+                                <div class="badge bg-danger text-uppercase fs-5 fw-bold px-3 py-2 border border-dark rounded-1 shadow-sm">LVL <span id="boss-level">...</span></div>
+                                <span class="fw-bold fs-5"><span id="boss-hp-text" class="text-white">...</span> / 1000 HP</span>
+                            </div>
+                            <div class="ch-progress mb-4 border border-2 border-danger shadow-sm" style="height: 32px; background-color: #2a0a0a; border-radius: 4px;">
+                                <div id="boss-hp-bar" class="ch-progress-bar bg-danger" role="progressbar" style="width: 100%; transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+                            </div>
+                            
+                            <!-- Combat Modifiers Box -->
+                            <div class="row g-2 mb-4">
+                                <div class="col-6">
+                                    <div class="p-2 border border-secondary shadow-sm rounded-1 text-center bg-dark" style="background-color: rgba(255,183,3,0.1) !important;">
+                                        <div class="text-warning small fw-bold text-uppercase tracking-wide" style="font-size: 0.65rem;">Active Multiplier</div>
+                                        <div class="fs-4 fw-bold text-white mb-0 lh-1 mt-1">{{ streak }}<span class="text-warning fs-5">x</span></div>
+                                        <div class="text-muted-custom small text-uppercase tracking-wide" style="font-size: 0.55rem;">Streak Combo</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 border border-secondary shadow-sm rounded-1 text-center bg-dark" style="background-color: rgba(13,202,240,0.1) !important;">
+                                        <div class="text-info small fw-bold text-uppercase tracking-wide" style="font-size: 0.65rem;">Last Hit Dealt</div>
+                                        <div class="fs-4 fw-bold text-white mb-0 lh-1 mt-1">{% if recent_log %}-{{ "%.1f"|format((5 - recent_log.total_emissions) * 20) }}{% else %}0.0{% endif %}<span class="text-info fs-6"> HP</span></div>
+                                        <div class="text-muted-custom small text-truncate px-1 text-uppercase tracking-wide" style="font-size: 0.55rem;">{% if recent_log %}{{ recent_log.transport_type|title }} Action{% else %}No Attacks Yet{% endif %}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2 border border-secondary shadow-sm" style="background-color: rgba(220, 53, 69, 0.05);">
+                                <div class="text-danger small fw-bold text-uppercase mb-2 tracking-wide"><i class="bi bi-robot me-2 fs-5"></i> Boss Taunt:</div>
+                                <div id="ai-taunt" class="fst-italic text-white fs-5" style="min-height: 60px;">
+                                    <div class="spinner-border spinner-border-sm text-danger" role="status"></div> Gathering pollution data...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Strategy Manual -->
+                    <div class="border-top border-secondary pt-5 mt-3 position-relative z-1 p-md-3">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-book-half fs-3 text-warning me-3"></i>
+                            <h4 class="fw-bold text-uppercase tracking-wide text-warning mb-0">Combat Rulebook</h4>
+                        </div>
+                        <p class="text-muted-custom mb-4 fs-6">The Smog Boss feeds on CO₂. <strong class="text-danger">High-emission activities HEAL the boss</strong>. <strong class="text-success">Low/zero-emission activities DAMAGE the boss</strong>. Choose your actions wisely, Hero.</p>
+                        
+                        <div class="row g-4">
+                            <!-- Rule 1: Damage -->
+                            <div class="col-md-6">
+                                <div class="bg-surface p-4 rounded-2 border border-2 border-success h-100 d-flex flex-column hover-lift">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 45px; height: 45px;">⚔️</div>
+                                        <h5 class="fw-bold text-success mb-0 tracking-wide text-uppercase">Actions That DAMAGE</h5>
+                                    </div>
+                                    <p class="text-muted-custom small mb-0 flex-grow-1">Walking, cycling, taking the bus/train, eating vegan/vegetarian meals, and using low amounts of electricity all deal damage to the Smog Boss because they produce little or no CO₂.</p>
+                                </div>
+                            </div>
+                            <!-- Rule 2: Heal -->
+                            <div class="col-md-6">
+                                <div class="bg-surface p-4 rounded-2 border border-2 border-danger h-100 d-flex flex-column hover-lift">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 45px; height: 45px;">💀</div>
+                                        <h5 class="fw-bold text-danger mb-0 tracking-wide text-uppercase">Actions That HEAL Boss</h5>
+                                    </div>
+                                    <p class="text-muted-custom small mb-0 flex-grow-1">Driving a car, taking flights, and eating meat-heavy diets produce high CO₂, which HEALS the Smog Boss. Log these honestly — the boss grows stronger from your carbon footprint!</p>
+                                </div>
+                            </div>
+                            <!-- Rule 3: Streaks -->
+                            <div class="col-md-6">
+                                <div class="bg-surface p-4 rounded-2 border border-2 border-warning h-100 d-flex flex-column hover-lift">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 45px; height: 45px;">🔥</div>
+                                        <h5 class="fw-bold text-warning mb-0 tracking-wide text-uppercase">Streak Multiplier</h5>
+                                    </div>
+                                    <p class="text-muted-custom small mb-0 flex-grow-1">Logging activities on consecutive days builds your streak combo. Your streak multiplies ALL impacts — both damage AND healing. A 5-day streak means 5× power on every log!</p>
+                                </div>
+                            </div>
+                            <!-- Rule 4: Emissions Threshold -->
+                            <div class="col-md-6">
+                                <div class="bg-surface p-4 rounded-2 border border-2 border-info h-100 d-flex flex-column hover-lift">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="bg-info text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 45px; height: 45px;">📊</div>
+                                        <h5 class="fw-bold text-info mb-0 tracking-wide text-uppercase">Emission Thresholds</h5>
+                                    </div>
+                                    <p class="text-muted-custom small mb-0 flex-grow-1">Ultra-low emissions (&lt;1 kg CO₂) grant +20 bonus damage. Low (&lt;2 kg) grants +10. High emissions (&gt;5 kg) add +10 healing to the boss. Very high (&gt;10 kg) adds +15 healing.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Impact Reference Table -->
+                <div class="ch-card mb-4 border-0 shadow-sm" style="background: linear-gradient(145deg, #111, #1a1a1c); border-top: 4px solid #0dcaf0 !important;">
+                    <div class="p-md-4 p-3">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-table fs-3 text-info me-3"></i>
+                            <h4 class="fw-bold text-uppercase tracking-wide text-info mb-0">Impact Reference Table</h4>
+                        </div>
+                        <p class="text-muted-custom mb-4 fs-6"><strong class="text-success">Green values = damage to boss.</strong> <strong class="text-danger">Red values = boss heals.</strong> <strong class="text-warning">All values × your Streak Combo.</strong></p>
+                        <div class="table-responsive">
+                            <table class="table-custom w-100 align-middle" style="font-size: 0.9rem;">
+                                <thead><tr><th>Action Type</th><th class="text-center">Base Impact</th><th class="text-center">Green Bonus</th><th class="text-center">Emission Modifier</th><th class="text-center text-warning">Max Effect</th></tr></thead>
+                                <tbody>
+                                    <tr><td><i class="bi bi-person-walking text-success me-2"></i>Walk</td><td class="text-center text-success fw-bold">-40 HP</td><td class="text-center text-success fw-bold">-20 HP</td><td class="text-center text-success">-20 HP</td><td class="text-center text-success fw-bold">-80 HP ×streak</td></tr>
+                                    <tr><td><i class="bi bi-bicycle text-success me-2"></i>Bike</td><td class="text-center text-success fw-bold">-35 HP</td><td class="text-center text-success fw-bold">-20 HP</td><td class="text-center text-success">-20 HP</td><td class="text-center text-success fw-bold">-75 HP ×streak</td></tr>
+                                    <tr><td><i class="bi bi-train-front text-primary me-2"></i>Train</td><td class="text-center text-success fw-bold">-15 HP</td><td class="text-center text-muted-custom">—</td><td class="text-center text-success">-10 HP</td><td class="text-center text-success fw-bold">-25 HP ×streak</td></tr>
+                                    <tr><td><i class="bi bi-bus-front text-primary me-2"></i>Bus</td><td class="text-center text-success fw-bold">-10 HP</td><td class="text-center text-muted-custom">—</td><td class="text-center text-success">-10 HP</td><td class="text-center text-success fw-bold">-20 HP ×streak</td></tr>
+                                    <tr style="border-top: 2px solid var(--danger);"><td><i class="bi bi-car-front text-danger me-2"></i>Car</td><td class="text-center text-danger fw-bold">+15 HP</td><td class="text-center text-muted-custom">—</td><td class="text-center text-danger">+10 HP</td><td class="text-center text-danger fw-bold">+25 HP ×streak</td></tr>
+                                    <tr><td><i class="bi bi-airplane text-danger me-2"></i>Flight</td><td class="text-center text-danger fw-bold">+30 HP</td><td class="text-center text-muted-custom">—</td><td class="text-center text-danger">+15 HP</td><td class="text-center text-danger fw-bold">+45 HP ×streak</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h6 class="fw-bold text-uppercase tracking-wide text-info mt-4 mb-3"><i class="bi bi-egg-fried me-2"></i>Diet Impact (per log)</h6>
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3"><div class="bg-surface border border-success rounded-1 p-2 text-center"><div class="text-success fw-bold small">Vegan</div><div class="text-success fw-bold fs-5">-25 HP</div></div></div>
+                            <div class="col-6 col-md-3"><div class="bg-surface border border-success rounded-1 p-2 text-center"><div class="text-success fw-bold small">Vegetarian</div><div class="text-success fw-bold fs-5">-15 HP</div></div></div>
+                            <div class="col-6 col-md-3"><div class="bg-surface border border-custom rounded-1 p-2 text-center"><div class="text-muted-custom fw-bold small">Mixed</div><div class="text-white fw-bold fs-5">-5 HP</div></div></div>
+                            <div class="col-6 col-md-3"><div class="bg-surface border border-danger rounded-1 p-2 text-center"><div class="text-danger fw-bold small">Meat Heavy</div><div class="text-danger fw-bold fs-5">+20 HP</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="ch-card mb-5 border-0 shadow-sm border-start border-4 border-info mx-auto" style="background-color: var(--surface-light); border-color: #0dcaf0 !important;">
+                    <div class="d-flex gap-4 align-items-center p-2">
+                        <div class="feature-icon-wrapper rounded-circle bg-info text-dark shadow-sm d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; flex-shrink: 0;">
+                            <i class="bi bi-lightbulb-fill fs-3"></i>
+                        </div>
+                        <div class="w-100">
+                            <h5 class="fw-bold mb-2 text-info text-uppercase tracking-wide fs-6">Tactical AI Advice</h5>
+                            <p id="ai-tip" class="text-white mb-0 fs-6 lh-sm">
+                                <span class="spinner-border spinner-border-sm text-info" role="status"></span> Generating tactical insight based on your combat history...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('logger.log_entry') }}" class="btn btn-ch-primary btn-lg rounded-1 px-5 py-3 fw-bold text-uppercase tracking-wide shadow-lg border border-2 border-dark" style="font-size: 1.1rem;"><i class="bi bi-crosshair me-2"></i> Attack Boss (Log Activity)</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.hover-lift { transition: transform 0.2s, background-color 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.hover-lift:hover { transform: translateY(-5px); background-color: var(--surface-light); box-shadow: 0 8px 15px rgba(0,0,0,0.5); }
+.tracking-wide { letter-spacing: 0.1em; }
+@keyframes boss-pulse-heavy {
+    0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 15px rgba(220,53,69,0.6)); border-color: rgba(220,53,69,0.5) !important; }
+    50% { transform: scale(1.08) translateY(-10px); filter: drop-shadow(0 0 40px rgba(220,53,69,1)); border-color: rgba(220,53,69,1) !important; }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch("{{ url_for('api.api_insights') }}")
+        .then(response => response.json())
+        .then(data => {
+            // Render text
+            document.getElementById('ai-tip').innerHTML = data.tip;
+            document.getElementById('ai-taunt').innerHTML = '"' + data.taunt + '"';
+            
+            // Update Boss Stats
+            document.getElementById('boss-level').innerText = data.boss_level;
+            
+            // Format HP counter
+            const rawHp = data.boss_hp;
+            const hpStr = rawHp % 1 === 0 ? rawHp.toString() : rawHp.toFixed(1);
+            document.getElementById('boss-hp-text').innerText = hpStr;
+            
+            // Animate HP bar
+            setTimeout(() => {
+                const widthPercent = Math.min(100, Math.max(0, (rawHp / 1000) * 100));
+                document.getElementById('boss-hp-bar').style.width = widthPercent + '%';
+            }, 800);
+        })
+        .catch(err => {
+            document.getElementById('ai-tip').innerText = "Database connection offline. Attack manually.";
+            document.getElementById('ai-taunt').innerText = '"Puny human system failure... I hunger for carbon!"';
+        });
+});
+</script>
+{% endblock %}

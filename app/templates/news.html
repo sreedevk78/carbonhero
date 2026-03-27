@@ -1,0 +1,142 @@
+<!-- templates/news.html -->
+{% extends "base.html" %}
+{% block title %}Environmental News{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-5 mt-3">
+            <div>
+                <h1 class="fw-bold mb-0 text-uppercase tracking-wide fs-2 mb-2" style="color: var(--danger);"><i class="bi bi-broadcast me-2"></i> GLOBAL INTEL FEED</h1>
+                <p class="text-muted-custom fs-5 fw-bold mb-0">Live environmental updates shaping your combat strategy.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-ch-outline rounded-1 border-2 text-primary border-primary px-4">
+                    DASHBOARD
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Main News Feed -->
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-custom">
+                    <h3 class="fw-bold mb-0 text-uppercase tracking-wide fs-4 text-main">LATEST BRIEFINGS</h3>
+                    <span id="fetch-time-badge" class="badge text-dark rounded-1 shadow-sm px-3 py-2 fw-bold fs-6" style="background-color: var(--primary); display: none;">
+                        FETCHED: --:--
+                    </span>
+                </div>
+
+                <!-- Async Loading Scaffold -->
+                <div id="news-container" class="d-grid gap-4 mt-2">
+                    <div class="ch-card border border-custom p-5 text-center bg-surface border-dashed">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <h4 class="fw-bold text-main mb-2 text-uppercase tracking-wide">ESTABLISHING UPLINK...</h4>
+                        <p class="text-muted-custom mb-0 fw-bold">Downloading latest environmental briefings.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Trends Sidebar -->
+            <div class="col-lg-4">
+                <div class="ch-card border border-custom p-0 bg-surface h-100 rounded-2 overflow-hidden">
+                    <div class="p-4 border-bottom border-custom" style="background-color: var(--bg-color);">
+                        <h3 class="fw-bold mb-0 text-uppercase tracking-wide fs-5">TRENDS TO WATCH</h3>
+                    </div>
+                    
+                    <div class="d-grid p-4 gap-0">
+                        <div class="py-4 border-bottom border-custom">
+                            <div class="d-flex gap-3 align-items-center">
+                                <i class="bi bi-wind fs-2 text-main"></i>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-uppercase text-main fs-6">Renewables Momentum</h5>
+                                    <p class="text-muted-custom small mb-0 fw-bold lh-sm">Global wind grid capacities increasing.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-4 border-bottom border-custom">
+                            <div class="d-flex gap-3 align-items-center">
+                                <i class="bi bi-building fs-2 text-main"></i>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-uppercase text-main fs-6">Policy Shift</h5>
+                                    <p class="text-muted-custom small mb-0 fw-bold lh-sm">New regulations and targets taking shape.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-4">
+                            <div class="d-flex gap-3 align-items-center">
+                                <i class="bi bi-lightning-fill fs-2 text-main"></i>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-uppercase text-main fs-6">Sustainable Tech</h5>
+                                    <p class="text-muted-custom small mb-0 fw-bold lh-sm">Battery tech and storage improving.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.border-dashed { border-style: dashed !important; }
+.tracking-wide { letter-spacing: 0.1em; }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetch("{{ url_for('api.api_news') }}")
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('news-container');
+            const timeBadge = document.getElementById('fetch-time-badge');
+            
+            if (data.news && data.news.length > 0) {
+                container.innerHTML = '';
+                timeBadge.innerHTML = 'FETCHED: ' + data.fetch_time;
+                timeBadge.style.display = 'inline-block';
+                
+                data.news.forEach(article => {
+                    const card = document.createElement('div');
+                    card.className = "ch-card border-0 p-4 rounded-2 bg-surface position-relative overflow-hidden group border border-custom";
+                    
+                    let sourceHtml = '';
+                    if (article.source) {
+                        sourceHtml = `<a href="${article.source}" target="_blank" rel="noopener noreferrer" class="badge bg-info text-dark rounded-1 px-3 py-2 text-decoration-none ms-2 shadow-sm border border-info hover-lift"><i class="bi bi-box-arrow-up-right me-1"></i> Read Source</a>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="position-absolute start-0 top-0 bottom-0" style="width: 8px; background-color: var(--danger);"></div>
+                        <div class="ps-4">
+                            <h4 class="fw-bold mb-3 text-main article-title text-uppercase lh-sm">${article.title}</h4>
+                            <p class="text-muted-custom mb-4 fw-medium" style="line-height: 1.6; font-size: 0.95rem;">${article.description}</p>
+                            <span class="badge border border-custom text-muted-custom rounded-1 px-3 py-2">ARTICLE</span>
+                            ${sourceHtml}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = `
+                    <div class="ch-card border border-custom p-5 text-center bg-surface border-dashed">
+                        <i class="bi bi-exclamation-triangle-fill mb-4 d-inline-block" style="font-size: 3rem; color: var(--danger);"></i>
+                        <h4 class="fw-bold text-main mb-2 text-uppercase tracking-wide">NO NEWS AVAILABLE</h4>
+                        <p class="text-muted-custom mb-0 fw-bold">Unable to fetch insights at this time. Please try again later.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('news-container').innerHTML = `
+                <div class="ch-card border border-custom p-5 text-center bg-surface border-dashed">
+                    <i class="bi bi-exclamation-triangle-fill mb-4 d-inline-block" style="font-size: 3rem; color: var(--danger);"></i>
+                    <h4 class="fw-bold text-main mb-2 text-uppercase tracking-wide">CONNECTION ERROR</h4>
+                    <p class="text-muted-custom mb-0 fw-bold">Failed to connect to Intel servers.</p>
+                </div>
+            `;
+        });
+});
+</script>
+{% endblock %}

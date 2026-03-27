@@ -1,0 +1,167 @@
+<!-- templates/leaderboard.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-5 mt-3">
+            <div>
+                <h1 class="fw-bold mb-0 text-uppercase tracking-wide fs-2 mb-2" style="color: var(--primary);">Hall of Fame</h1>
+                <p class="text-muted-custom fs-5 fw-bold mb-0">The Global Elite of Carbon Reduction.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('logger.log_entry') }}" class="btn btn-ch-primary rounded-1 shadow px-4 text-uppercase fw-bold tracking-wide">
+                    <i class="bi bi-plus-circle me-2"></i> Log Activity
+                </a>
+            </div>
+        </div>
+
+        <!-- The Podium -->
+        {% set top_users = users[:3] %}
+        {% if top_users|length >= 1 %}
+        <div class="row justify-content-center align-items-end mb-5 text-center g-3 px-2">
+            <!-- 2nd Place -->
+            {% if top_users|length >= 2 %}
+            <div class="col-4 col-md-3 opacity-75 hover-lift">
+                <div class="ch-card border-0 bg-surface position-relative overflow-hidden pb-3" style="min-height: 180px; border-top: 4px solid silver !important;">
+                    <div class="position-absolute w-100 display-1 fw-bold opacity-10" style="top: -20px; left: 0;">#2</div>
+                    <div class="mt-4 pt-3 position-relative z-1">
+                        <i class="bi bi-person-circle fs-1 text-secondary"></i>
+                        <div class="fw-bold mt-2 px-2 text-white" style="word-break: break-word;">{{ top_users[1].email.split('@')[0] }}</div>
+                        <div class="badge bg-secondary text-dark mt-2 fs-6 tracking-wide">{{ top_users[1].total_points }} PTS</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 1st Place -->
+            <div class="col-4 col-md-4 pb-4 px-0 z-1 hover-lift">
+                <div class="ch-card border-0 position-relative overflow-hidden shadow-lg mx-md-2 pb-3" style="min-height: 240px; background: linear-gradient(145deg, var(--bg-color), #221c0b); border-top: 6px solid gold !important;">
+                    <div class="position-absolute w-100 fw-bold opacity-25" style="top: 0px; font-size: 8rem; left: 0; color: gold;">#1</div>
+                    <div class="mt-4 pt-2 position-relative z-1">
+                        <i class="bi bi-person-circle display-3 text-warning" style="filter: drop-shadow(0 0 15px rgba(255,215,0,0.6));"></i>
+                        <div class="fw-bold mt-3 px-2 text-warning fs-5 tracking-wide" style="word-break: break-word;">{{ top_users[0].email.split('@')[0] }}</div>
+                        <div class="badge bg-warning text-dark mt-2 fs-5 px-3 py-2 tracking-wide">{{ top_users[0].total_points }} PTS</div>
+                        <div class="small fw-bold text-uppercase mt-2 tracking-wide text-warning" style="font-size: 0.65rem;"><i class="bi bi-stars"></i> Best Environmentalist</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3rd Place -->
+            {% if top_users|length >= 3 %}
+            <div class="col-4 col-md-3 opacity-75 hover-lift">
+                <div class="ch-card border-0 bg-surface position-relative overflow-hidden pb-3" style="min-height: 160px; border-top: 4px solid #cd7f32 !important;">
+                    <div class="position-absolute w-100 display-1 fw-bold opacity-10" style="top: -20px; left: 0;">#3</div>
+                    <div class="mt-4 pt-1 position-relative z-1">
+                        <i class="bi bi-person-circle fs-1" style="color: #cd7f32;"></i>
+                        <div class="fw-bold mt-2 px-2 text-white" style="word-break: break-word;">{{ top_users[2].email.split('@')[0] }}</div>
+                        <div class="badge text-dark mt-2 fs-6 tracking-wide" style="background-color: #cd7f32;">{{ top_users[2].total_points }} PTS</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="row g-4 align-items-stretch mt-2">
+            <!-- Left Col: Remaining Leaderboard Table -->
+            <div class="col-lg-8">
+                <div class="ch-card border-0 p-4 h-100 border-top border-4 border-primary bg-surface shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-custom">
+                        <h3 class="fw-bold mb-0 text-uppercase tracking-wide fs-5">GLOBAL RANKINGS</h3>
+                        <i class="bi bi-list-ol fs-4 text-muted-custom"></i>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table-custom w-100 align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;" class="text-center">Rank</th>
+                                    <th>Player</th>
+                                    <th class="text-end">Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set rem_users = users[3:] %}
+                                {% for user in rem_users %}
+                                <tr class="hover-lift-sm">
+                                    <td class="text-center fs-5 text-muted-custom fw-bold">
+                                        #{{ loop.index + 3 }}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-main fs-6 text-uppercase tracking-wide">
+                                            {{ user.email.split('@')[0] }}
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="fs-5 fw-bold" style="color: var(--primary);">
+                                            {{ user.total_points }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% if not rem_users %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted-custom fw-bold">No remaining active players.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Col: User Progress -->
+            <div class="col-lg-4">
+                <div class="ch-card border-0 p-0 overflow-hidden h-100 d-flex flex-column border border-custom">
+                    <div class="p-4 text-dark position-relative shadow-sm" style="background-color: var(--primary);">
+                        <i class="bi bi-person-bounding-box position-absolute opacity-10" style="font-size: 8rem; right: -20px; top: -10px; color: #000;"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-3 position-relative z-1">
+                            <h3 class="fw-bold mb-0 text-uppercase tracking-wide text-dark fs-5">YOUR CONTRACT</h3>
+                        </div>
+                        
+                        <div class="mt-4 position-relative z-1">
+                            <div class="text-black-50 text-uppercase fw-bold tracking-wide small">Current Rank</div>
+                            <div class="fw-bold display-4 mb-0 text-dark" style="line-height: 1;">#{{ current_user_rank }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex-grow-1 bg-surface">
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-custom pb-3">
+                            <div class="text-muted-custom fw-bold small text-uppercase tracking-wide">To next tier</div>
+                            <div class="fw-bold text-white fs-4">{{ points_to_next_rank }}</div>
+                        </div>
+
+                        <div class="mt-4 mb-2 d-flex justify-content-between align-items-end">
+                            <div class="text-muted-custom small fw-bold text-uppercase tracking-wide">Weekly Goal</div>
+                            <div class="fs-5 fw-bold text-main">{{ weekly_progress }}%</div>
+                        </div>
+                        
+                        <div class="ch-progress bg-bg-color border border-custom mb-5" style="height: 16px;">
+                            <div class="ch-progress-bar bg-primary" role="progressbar"
+                                 style="width: {{ weekly_progress }}%; transition: width 1s ease;"
+                                 aria-valuenow="{{ weekly_progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <div class="rounded-2 p-4 text-center mt-auto border border-2 border-custom" style="background-color: var(--bg-color);">
+                            <div class="fw-bold mb-3 fs-6 text-main text-uppercase tracking-wide">Ready to rank up?</div>
+                            <a href="{{ url_for('arena.boss_arena') }}" class="btn text-danger fw-bold w-100 rounded-1 shadow-sm py-2 text-uppercase tracking-wide border border-danger border-2 btn-ch-outline">
+                                Engage Boss
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.tracking-wide { letter-spacing: 0.1em; }
+.hover-lift { transition: transform 0.2s, background-color 0.2s; }
+.hover-lift:hover { transform: translateY(-5px); }
+.hover-lift-sm { transition: transform 0.2s; }
+.hover-lift-sm:hover { transform: translateX(5px); background-color: var(--bg-color); }
+</style>
+{% endblock %}

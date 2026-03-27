@@ -1,0 +1,332 @@
+<!-- templates/log_entry.html -->
+{% extends "base.html" %}
+{% block title %}Log Activity{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 mt-3">
+                    <div>
+                        <h1 class="fw-bold mb-0 text-gamification fs-2 tracking-wide text-uppercase" style="color: var(--primary);"><i class="bi bi-crosshair me-2"></i> MISSION LOG</h1>
+                        <p class="text-muted-custom fs-5 fw-bold">Select tracking method to deal damage.</p>
+                    </div>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-ch-outline rounded-1 border-2 text-white border-white py-2" style="background: transparent;">
+                        <i class="bi bi-arrow-left me-2"></i> DASHBOARD
+                    </a>
+                </div>
+
+                <div class="ch-card border-0 shadow-lg mb-5 p-0 bg-surface border-top border-4 border-primary">
+                    <!-- Nav Tabs -->
+                    <div class="p-4 border-bottom border-custom bg-black bg-opacity-25">
+                        <ul class="nav nav-pills nav-fill gap-3 ch-nav-pills" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold py-3 text-uppercase tracking-wide" data-bs-toggle="tab" data-bs-target="#standard-form" type="button">
+                                    <i class="bi bi-list-check me-2 fs-5"></i> Standard Log
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 text-uppercase tracking-wide" data-bs-toggle="tab" data-bs-target="#voice-input" type="button">
+                                    <i class="bi bi-mic-fill me-2 fs-5"></i> Voice Tracking
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 text-uppercase tracking-wide" data-bs-toggle="tab" data-bs-target="#custom-activity" type="button">
+                                    <i class="bi bi-pencil-square me-2 fs-5"></i> Custom Text
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 p-md-5">
+                        <div class="tab-content">
+                            <!-- Standard Form -->
+                            <div class="tab-pane fade show active" id="standard-form">
+                                <form method="POST" id="standardLogForm">
+                                    {{ form.hidden_tag() }}
+
+                                    <!-- Activity Category Selector -->
+                                    <div class="mb-4">
+                                        <label class="form-label text-uppercase small tracking-wide fw-bold">Activity Category</label>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button type="button" class="btn category-btn active px-4 py-3 fw-bold rounded-1 text-uppercase" data-category="transport">
+                                                <i class="bi bi-car-front-fill me-2"></i> Transport
+                                            </button>
+                                            <button type="button" class="btn category-btn px-4 py-3 fw-bold rounded-1 text-uppercase" data-category="food">
+                                                <i class="bi bi-egg-fried me-2"></i> Food & Diet
+                                            </button>
+                                            <button type="button" class="btn category-btn px-4 py-3 fw-bold rounded-1 text-uppercase" data-category="energy">
+                                                <i class="bi bi-lightning-fill me-2"></i> Energy
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="activity_category" id="activityCategory" value="transport">
+                                    </div>
+
+                                    <hr class="border-custom my-4">
+
+                                    <!-- TRANSPORT FIELDS -->
+                                    <div id="transport-fields" class="category-fields">
+                                        <div class="row g-4 mb-4">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label text-uppercase small tracking-wide fw-bold">Transport Type</label>
+                                                    {{ form.transport_type(class="form-select border-2 border-custom rounded-1 text-main", id="transportTypeSelect") }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label text-uppercase small tracking-wide fw-bold">Distance (km)</label>
+                                                    {{ form.distance(class="form-control border-2 border-custom rounded-1 text-main", placeholder="e.g. 15") }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fuel fields (Car only) -->
+                                        <div id="fuel-fields" class="row g-4 mb-4" style="display: none;">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label text-uppercase small tracking-wide fw-bold">Fuel Type</label>
+                                                    {{ form.fuel_type(class="form-select border-2 border-custom rounded-1 text-main") }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label text-uppercase small tracking-wide fw-bold">Fuel Used (Liters) <span class="text-muted-custom fw-normal">— optional</span></label>
+                                                    {{ form.fuel_liters(class="form-control border-2 border-custom rounded-1 text-main", placeholder="e.g. 3.5") }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="alert border border-custom bg-black bg-opacity-25 rounded-1 p-3 mb-4" id="transport-hint">
+                                            <small class="text-muted-custom fw-bold"><i class="bi bi-info-circle me-1"></i> <span id="transport-hint-text">CO₂ calculated from distance × emission factor for your vehicle type.</span></small>
+                                        </div>
+                                    </div>
+
+                                    <!-- FOOD FIELDS -->
+                                    <div id="food-fields" class="category-fields" style="display: none;">
+                                        <div class="row g-4 mb-4">
+                                            <div class="col-md-8">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label text-uppercase small tracking-wide fw-bold">What did you eat today?</label>
+                                                    {{ form.diet_type(class="form-select border-2 border-custom rounded-1 text-main") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="alert border border-custom bg-black bg-opacity-25 rounded-1 p-3 mb-4">
+                                            <small class="text-muted-custom fw-bold"><i class="bi bi-info-circle me-1"></i> Diet emissions are calculated per meal using research-backed daily dietary CO₂ factors (Scarborough et al.).</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- ENERGY FIELDS -->
+                                    <div id="energy-fields" class="category-fields" style="display: none;">
+                                        <div class="row g-4 mb-4">
+                                            <div class="col-md-8">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label text-uppercase small tracking-wide fw-bold">Electricity Used (kWh)</label>
+                                                    {{ form.energy_usage(class="form-control border-2 border-custom rounded-1 text-main", placeholder="e.g. 12.5") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="alert border border-custom bg-black bg-opacity-25 rounded-1 p-3 mb-4">
+                                            <small class="text-muted-custom fw-bold"><i class="bi bi-info-circle me-1"></i> Emissions calculated using your country's grid intensity factor (India: 0.708 kg CO₂/kWh).</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid mt-2">
+                                        {{ form.submit(class="btn btn-ch-primary py-3 fw-bold fs-5 rounded-1 shadow border-0") }}
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Voice Input -->
+                            <div class="tab-pane fade" id="voice-input">
+                                <div class="text-center py-5 px-3">
+                                    <div class="pulse-ring-container mb-4 position-relative mx-auto" style="width: 140px; height: 140px;">
+                                        <button id="startVoice" class="btn rounded-circle w-100 h-100 position-relative z-2 border-0 d-flex align-items-center justify-content-center" style="background-color: var(--primary); box-shadow: 0 10px 30px rgba(255, 183, 3, 0.4);" type="button">
+                                            <i class="bi bi-mic-fill text-dark" style="font-size: 4rem;"></i>
+                                        </button>
+                                        <div id="pulseRing" class="position-absolute top-0 start-0 w-100 h-100 rounded-circle border border-2 border-primary z-1 opacity-0" style="transform: scale(1);"></div>
+                                    </div>
+                                    
+                                    <h4 id="voiceStatus" class="fw-bold mb-3 text-main text-uppercase tracking-wide">Ready to record</h4>
+                                    <p class="text-muted-custom mb-4 fw-bold">"I rode my bike for 5 kilometers to work today."</p>
+                                    
+                                    <div id="transcriptDisplay" class="alert p-4 mt-4 d-none fw-bold text-dark fs-5 text-center bg-white rounded-1 border-0 shadow"></div>
+                                    
+                                    <form method="POST" id="voiceForm" class="d-none mt-4">
+                                        {{ form.csrf_token }}
+                                        <input type="hidden" name="voice_input" value="true">
+                                        <input type="hidden" name="voice_transcript" id="voiceTranscript">
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-ch-primary btn-lg rounded-1 shadow border-0 py-3 text-dark fw-bold text-uppercase fs-5">
+                                                LOG VOICE ACTIVITY
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Custom Activity -->
+                            <div class="tab-pane fade" id="custom-activity">
+                                <div class="py-4">
+                                    <form method="POST">
+                                        {{ form.csrf_token }}
+                                        <div class="form-group mb-5">
+                                            <label class="form-label text-uppercase small tracking-wide fw-bold mb-3 d-block"><i class="bi bi-pencil-square me-2 fs-5"></i>CUSTOM DESCRIPTION</label>
+                                            <textarea class="form-control border-2 border-custom rounded-1 text-main fs-5 p-4" name="custom_activity"
+                                                      style="height: 180px; resize: none; background-color: var(--bg-color);" placeholder="Describe your activity in detail..."></textarea>
+                                        </div>
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn py-3 fw-bold fs-5 rounded-1 shadow border-0 text-white" style="background-color: var(--secondary);">
+                                                CALCULATE IMPACT
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.tracking-wide { letter-spacing: 0.1em; }
+.ch-nav-pills .nav-link { background: transparent; border: 2px solid var(--border-color); color: var(--text-muted); transition: all 0.2s; border-radius: 4px; }
+.ch-nav-pills .nav-link:hover { border-color: var(--primary); color: var(--text-main); }
+.ch-nav-pills .nav-link.active { background: var(--primary); color: #000 !important; border-color: var(--primary); box-shadow: 0 4px 10px rgba(255, 183, 3, 0.3); }
+
+.category-btn { background: transparent; border: 2px solid var(--border-color); color: var(--text-muted); transition: all 0.25s ease; }
+.category-btn:hover { border-color: var(--primary); color: var(--text-main); background: rgba(0, 255, 255, 0.05); }
+.category-btn.active { background: var(--primary); color: #000 !important; border-color: var(--primary); box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3); }
+.category-fields { animation: fadeSlideIn 0.3s ease; }
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+.pulsing #pulseRing { animation: pulse 1.5s infinite cubic-bezier(0.215, 0.610, 0.355, 1); border-width: 4px !important; border-color: var(--danger) !important; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== CATEGORY TOGGLE =====
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    const categoryInput = document.getElementById('activityCategory');
+    const transportFields = document.getElementById('transport-fields');
+    const foodFields = document.getElementById('food-fields');
+    const energyFields = document.getElementById('energy-fields');
+
+    const fieldGroups = { transport: transportFields, food: foodFields, energy: energyFields };
+
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.dataset.category;
+            categoryBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            categoryInput.value = category;
+
+            Object.keys(fieldGroups).forEach(key => {
+                if (fieldGroups[key]) {
+                    fieldGroups[key].style.display = key === category ? 'block' : 'none';
+                }
+            });
+        });
+    });
+
+    // ===== TRANSPORT SUB-TOGGLE =====
+    const transportSelect = document.getElementById('transportTypeSelect');
+    const fuelFields = document.getElementById('fuel-fields');
+    const hintText = document.getElementById('transport-hint-text');
+
+    const TRANSPORT_HINTS = {
+        car: 'CO₂ from fuel combustion. If you enter liters, we use EPA fuel factors. Otherwise, distance × 0.171 kg/km.',
+        bus: 'Public bus: ~0.104 kg CO₂ per km. A fraction of driving alone!',
+        train: 'Trains are ultra-efficient: ~0.035 kg CO₂ per km.',
+        bike: 'Zero emissions! Cycling deals massive bonus damage to the Smog Boss. 🚲',
+        walk: 'Zero emissions! Walking is the greenest transport possible. 🌿',
+        flight: 'Aviation: ICAO formula with 8% uplift and radiative forcing multiplier.'
+    };
+
+    if (transportSelect) {
+        transportSelect.addEventListener('change', function() {
+            const val = this.value;
+            if (fuelFields) {
+                fuelFields.style.display = val === 'car' ? 'flex' : 'none';
+            }
+            if (hintText && TRANSPORT_HINTS[val]) {
+                hintText.textContent = TRANSPORT_HINTS[val];
+            }
+        });
+        // Trigger on load
+        transportSelect.dispatchEvent(new Event('change'));
+    }
+
+    // ===== VOICE INPUT (PRESERVED) =====
+    const startVoiceBtn = document.getElementById('startVoice');
+    const pulseRingContainer = document.querySelector('.pulse-ring-container');
+    const voiceStatus = document.getElementById('voiceStatus');
+    const voiceForm = document.getElementById('voiceForm');
+    const voiceTranscript = document.getElementById('voiceTranscript');
+    const transcriptDisplay = document.getElementById('transcriptDisplay');
+
+    if(startVoiceBtn) {
+        startVoiceBtn.addEventListener('click', function() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = function() {
+                    voiceStatus.textContent = 'LISTENING...';
+                    voiceStatus.style.color = 'var(--danger)';
+                    startVoiceBtn.style.backgroundColor = 'var(--danger)';
+                    pulseRingContainer.classList.add('pulsing');
+                    transcriptDisplay.classList.add('d-none');
+                    voiceForm.classList.add('d-none');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    voiceTranscript.value = transcript;
+                    transcriptDisplay.textContent = '"' + transcript + '"';
+                    transcriptDisplay.classList.remove('d-none');
+                    voiceForm.classList.remove('d-none');
+                };
+
+                recognition.onerror = function(event) {
+                    voiceStatus.textContent = 'ERROR OCCURRED';
+                    voiceStatus.style.color = 'var(--text-main)';
+                    resetVoiceBtn();
+                };
+
+                recognition.onend = function() {
+                    if (voiceStatus.textContent.includes('LISTENING')) {
+                        voiceStatus.textContent = 'FINISHED';
+                        voiceStatus.style.color = 'var(--text-main)';
+                    }
+                    resetVoiceBtn();
+                };
+
+                recognition.start();
+            } else {
+                voiceStatus.textContent = 'SYS ERROR: NO MIC';
+            }
+        });
+    }
+
+    function resetVoiceBtn() {
+        startVoiceBtn.style.backgroundColor = 'var(--primary)';
+        pulseRingContainer.classList.remove('pulsing');
+    }
+});
+</script>
+{% endblock %}

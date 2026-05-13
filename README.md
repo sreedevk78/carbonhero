@@ -37,7 +37,7 @@ CarbonHero is a gamified sustainability platform designed to help users track, u
 ## 🛠️ Technology Stack
 
 - **Backend**: Flask (Python)
-- **Database**: SQLite (SQLAlchemy)
+- **Database**: Supabase (PostgreSQL) with SQLAlchemy
 - **AI Engines**: Groq (Primary), Google Gemini, OpenAI
 - **Frontend**: Glassmorphic UI with CSS & HTML5
 

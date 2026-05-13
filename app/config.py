@@ -8,7 +8,7 @@ class Config:
     
     # Supabase Production Connection (pg8000 Pure-Python Driver)
     # This avoids binary compatibility issues on Vercel
-    SUPABASE_URL = "postgresql+pg8000://postgres.adarimtvhsdpexrwrzii:sreedevkrishna030524@db.adarimtvhsdpexrwrzii.supabase.co:5432/postgres"
+    SUPABASE_URL = "postgresql+pg8000://postgres:sreedevkrishna030524.adarimtvhsdpexrwrzii@52.74.252.201:5432/postgres"
     
     SQLALCHEMY_DATABASE_URI = SUPABASE_URL
         

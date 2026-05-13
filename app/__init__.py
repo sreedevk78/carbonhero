@@ -48,9 +48,6 @@ def create_app(config_class=Config):
 
     # Database Initialization Hook inside app context
     with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            print("Database connection error on startup:", e)
+        db.create_all()
 
     return app

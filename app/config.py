@@ -8,11 +8,14 @@ class Config:
     
     # Supabase Production Connection (pg8000 Pure-Python Driver)
     # This avoids binary compatibility issues on Vercel
-    SUPABASE_URL = "postgresql+pg8000://postgres.adarimtvhsdpexrwrzii:sreedevkrishna030524@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require"
+    SUPABASE_URL = "postgresql+pg8000://postgres.adarimtvhsdpexrwrzii:sreedevkrishna030524@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
     
     SQLALCHEMY_DATABASE_URI = SUPABASE_URL
         
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'poolclass': NullPool,  # Recommended for serverless
+        'poolclass': NullPool,
+        'connect_args': {
+            'ssl_context': True
+        }
     }

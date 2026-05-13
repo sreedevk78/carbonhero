@@ -6,6 +6,15 @@ from app.utils.ai import CarbonPredictor
 bp = Blueprint('main', __name__)
 carbon_ai = CarbonPredictor()
 
+@bp.route('/test-db')
+def test_db():
+    try:
+        from sqlalchemy import text
+        db.session.execute(text('SELECT 1'))
+        return "Database Connection Successful!"
+    except Exception as e:
+        return f"Database Error: {str(e)}"
+
 @bp.route('/')
 def home():
     if current_user.is_authenticated:

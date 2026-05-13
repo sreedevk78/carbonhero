@@ -7,7 +7,7 @@ class Config:
     
     # Primary: Supabase PostgreSQL (Production/Vercel)
     # Fallback: SQLite (Local)
-    SUPABASE_URL = "postgresql+psycopg2://postgres:sreedevkrishna030524@db.adarimtvhsdpexrwrzii.supabase.co:5432/postgres"
+    SUPABASE_URL = "postgresql+psycopg2://postgres:sreedevkrishna030524@db.adarimtvhsdpexrwrzii.supabase.co:5432/postgres?sslmode=require"
     
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or SUPABASE_URL
         

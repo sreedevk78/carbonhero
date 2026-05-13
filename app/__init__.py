@@ -4,7 +4,10 @@ from app.config import Config
 from app.extensions import db, login_manager, bootstrap
 
 def create_app(config_class=Config):
-    app = Flask(__name__, instance_relative_config=True)
+    # On Vercel, the instance path must be writable
+    instance_path = '/tmp/instance' if os.environ.get('VERCEL') else None
+    
+    app = Flask(__name__, instance_path=instance_path, instance_relative_config=True)
     app.config.from_object(config_class)
 
     # Initialize Flask extensions

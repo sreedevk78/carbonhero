@@ -46,8 +46,7 @@ def create_app(config_class=Config):
     except OSError:
         pass
 
-    # Database Initialization Hook inside app context
-    with app.app_context():
-        db.create_all()
-
+    # Database Initialization removed from factory
+    # Use /setup-db to initialize schema manually
+    
     return app

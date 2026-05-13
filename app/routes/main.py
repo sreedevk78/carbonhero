@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user, login_required
 from app.models import CarbonLog
+from app.extensions import db
 from app.utils.ai import CarbonPredictor
 
 bp = Blueprint('main', __name__)
@@ -10,10 +11,25 @@ carbon_ai = CarbonPredictor()
 def test_db():
     try:
         from sqlalchemy import text
-        db.session.execute(text('SELECT 1'))
-        return "Database Connection Successful!"
+        # Check connection and get table count
+        result = db.session.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'"))
+        count = result.scalar()
+        return {
+            "status": "success",
+            "message": "Connected to Supabase!",
+            "tables_found": count,
+            "engine": str(db.engine.url.drivername)
+        }
     except Exception as e:
-        return f"Database Error: {str(e)}"
+        return {"status": "error", "message": str(e)}, 500
+
+@bp.route('/setup-db')
+def setup_db():
+    try:
+        db.create_all()
+        return {"status": "success", "message": "Database tables created successfully!"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}, 500
 
 @bp.route('/')
 def home():
